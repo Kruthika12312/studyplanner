@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>StudyZone — Smart Study Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="logo-mark">SZ</span>
+    <span class="logo-text">StudyZone</span>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">✕</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
+      <span class="nav-icon">⊞</span> Dashboard
+    </button>
+    <button class="nav-btn" data-view="subjects" onclick="showView('subjects')">
+      <span class="nav-icon">📚</span> Subjects
+    </button>
+    <button class="nav-btn" data-view="planner" onclick="showView('planner')">
+      <span class="nav-icon">📅</span> Study Planner
+    </button>
+    <button class="nav-btn" data-view="timer" onclick="showView('timer')">
+      <span class="nav-icon">⏱</span> Focus Timer
+    </button>
+    <button class="nav-btn" data-view="progress" onclick="showView('progress')">
+      <span class="nav-icon">📊</span> Progress
+    </button>
+  </nav>
+
+  <div class="sidebar-subjects" id="subjectList">
+    <p class="sidebar-section-label">Your Subjects</p>
+    <div id="sidebarSubjectItems"></div>
+    <button class="add-subject-mini" onclick="showView('subjects'); document.getElementById('addSubjectForm').classList.add('open')">+ Add Subject</button>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="main-wrap" id="mainWrap">
+  <!-- Top Bar -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-center">
+      <span id="topbarTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="streak-badge" id="streakBadge">🔥 0 day streak</span>
+    </div>
+  </header>
+
+  <!-- ===== VIEW: DASHBOARD ===== -->
+  <section class="view active" id="view-dashboard">
+    <div class="dashboard-hero">
+      <div class="hero-text">
+        <p class="hero-eyebrow">Ready to focus?</p>
+        <h1 class="hero-headline">Let's make today count.</h1>
+        <p class="hero-sub" id="dashGreeting">Here's your study snapshot.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-circle c1"></div>
+        <div class="art-circle c2"></div>
+        <div class="art-circle c3"></div>
+        <span class="art-icon">🎓</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-num" id="statSubjects">0</span>
+        <span class="stat-label">Subjects</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statTopics">0</span>
+        <span class="stat-label">Topics Total</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statDone">0</span>
+        <span class="stat-label">Completed</span>
+      </div>
+      <div class="stat-card accent">
+        <span class="stat-num" id="statHours">0h</span>
+        <span class="stat-label">Time Studied</span>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Today's Plan -->
+      <div class="dash-card">
+        <h2 class="card-title">Today's Focus</h2>
+        <div id="todayFocus">
+          <p class="empty-hint">No sessions planned yet. <button class="link-btn" onclick="showView('planner')">Add one →</button></p>
+        </div>
+      </div>
+
+      <!-- Quick Start Timer -->
+      <div class="dash-card">
+        <h2 class="card-title">Quick Start</h2>
+        <p class="card-sub">Pick a subject and start immediately.</p>
+        <select id="quickSubjectPick" class="input-field">
+          <option value="">— choose subject —</option>
+        </select>
+        <button class="btn-primary mt-sm" onclick="quickStart()">▶ Start Focus Session</button>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="dash-card wide">
+        <h2 class="card-title">Recent Activity</h2>
+        <div id="recentActivity">
+          <p class="empty-hint">Nothing yet — study something first!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: SUBJECTS ===== -->
+  <section class="view" id="view-subjects">
+    <div class="view-header">
+      <h1 class="view-title">Subjects & Topics</h1>
+      <button class="btn-primary" onclick="toggleAddSubjectForm()">+ New Subject</button>
+    </div>
+
+    <!-- Add Subject Form -->
+    <div class="form-panel" id="addSubjectForm">
+      <h3 class="form-title">Create a Subject</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Subject Name</label>
+          <input type="text" id="subjectName" class="input-field" placeholder="e.g. Data Structures" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color Tag</label>
+          <div class="color-picker" id="colorPicker">
+            <span class="color-dot selected" data-color="#6366f1" style="background:#6366f1"></span>
+            <span class="color-dot" data-color="#ec4899" style="background:#ec4899"></span>
+            <span class="color-dot" data-color="#f59e0b" style="background:#f59e0b"></span>
+            <span class="color-dot" data-color="#10b981" style="background:#10b981"></span>
+            <span class="color-dot" data-color="#3b82f6" style="background:#3b82f6"></span>
+            <span class="color-dot" data-color="#ef4444" style="background:#ef4444"></span>
+            <span class="color-dot" data-color="#8b5cf6" style="background:#8b5cf6"></span>
+            <span class="color-dot" data-color="#14b8a6" style="background:#14b8a6"></span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">How to Study This Subject</label>
+        <textarea id="subjectHowTo" class="input-field textarea" rows="3" placeholder="e.g. Read textbook chapter → solve practice problems → review flashcards"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Study Goal (hours/week)</label>
+        <input type="number" id="subjectGoal" class="input-field short" placeholder="e.g. 5" min="1" max="40"/>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addSubject()">Create Subject</button>
+        <button class="btn-ghost" onclick="toggleAddSubjectForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Subject Cards -->
+    <div class="subjects-grid" id="subjectsGrid">
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>No subjects yet</h3>
+        <p>Create your first subject to get started.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: PLANNER ===== -->
+  <section class="view" id="view-planner">
+    <div class="view-header">
+      <h1 class="view-title">Study Planner</h1>
+      <button class="btn-primary" onclick="toggleAddSessionForm()">+ Schedule Session</button>
+    </div>
+
+    <div class="form-panel" id="addSessionForm">
+      <h3 class="form-title">Schedule a Study Session</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select id="sessionSubject" class="input-field" onchange="populateTopicSelect()">
+            <option value="">— select subject —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Topic</label>
+          <select id="sessionTopic" class="input-field">
+            <option value="">— select topic —</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="sessionDate" class="input-field" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Planned Duration (min)</label>
+          <input type="number" id="sessionDuration" class="input-field short" placeholder="45" min="5" max="300"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="addSession()">Schedule</button>
+        <button class="btn-ghost" onclick="toggleAddSessionForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Week View -->
+    <div class="week-nav">
+      <button class="btn-ghost small" onclick="shiftWeek(-1)">← Prev</button>
+      <span id="weekLabel" class="week-label"></span>
+      <button class="btn-ghost small" onclick="shiftWeek(1)">Next →</button>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+  </section>
+
+  <!-- ===== VIEW: TIMER ===== -->
+  <section class="view" id="view-timer">
+    <div class="view-header">
+      <h1 class="view-title">Focus Timer</h1>
+    </div>
+
+    <div class="timer-layout">
+      <div class="timer-card">
+        <div class="timer-selectors">
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select id="timerSubject" class="input-field" onchange="populateTimerTopics()">
+              <option value="">— select —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Topic</label>
+            <select id="timerTopic" class="input-field">
+              <option value="">— select —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="timer-mode-tabs">
+          <button class="mode-tab active" data-mins="25" onclick="setTimerMode(25, this)">Pomodoro 25m</button>
+          <button class="mode-tab" data-mins="50" onclick="setTimerMode(50, this)">Deep Work 50m</button>
+          <button class="mode-tab" data-mins="0" onclick="setTimerMode(0, this)">Custom</button>
+        </div>
+        <div class="custom-time-row" id="customTimeRow" style="display:none">
+          <input type="number" id="customMinutes" class="input-field short" placeholder="minutes" min="1" max="300"/>
+          <button class="btn-ghost small" onclick="applyCustomTime()">Set</button>
+        </div>
+
+        <div class="timer-display" id="timerDisplay">
+          <svg class="timer-ring" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="88" class="ring-track"/>
+            <circle cx="100" cy="100" r="88" class="ring-progress" id="ringProgress"/>
+          </svg>
+          <div class="timer-inner">
+            <span class="timer-time" id="timerTime">25:00</span>
+            <span class="timer-state" id="timerState">Ready</span>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button class="btn-timer-main" id="timerStartBtn" onclick="toggleTimer()">▶ Start</button>
+          <button class="btn-ghost" onclick="resetTimer()">↺ Reset</button>
+        </div>
+
+        <div class="session-note-row">
+          <label class="form-label">Session notes</label>
+          <textarea class="input-field textarea" id="sessionNotes" rows="2" placeholder="What you want to cover in this session…"></textarea>
+        </div>
+      </div>
+
+      <!-- Session Log -->
+      <div class="timer-log-panel">
+        <h2 class="card-title">Today's Sessions</h2>
+        <div id="timerLog">
+          <p class="empty-hint">No sessions yet today.</p>
+        </div>
+        <div class="total-time-row">
+          <span>Total today:</span>
+          <span class="mono-time" id="totalTimeToday">0 min</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: PROGRESS ===== -->
+  <section class="view" id="view-progress">
+    <div class="view-header">
+      <h1 class="view-title">Progress Overview</h1>
+    </div>
+
+    <div class="progress-grid" id="progressGrid">
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h3>Nothing to show yet</h3>
+        <p>Add subjects and start studying to see your progress.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== TOPIC DETAIL MODAL ===== -->
+<div class="modal-overlay" id="topicModal" onclick="closeTopicModal(event)">
+  <div class="modal" id="topicModalInner">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalSubjectTitle">Subject</h2>
+      <button class="modal-close" onclick="closeTopicModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="how-to-box" id="modalHowTo"></div>
+
+      <div class="modal-section">
+        <div class="modal-section-header">
+          <h3>Topics</h3>
+          <button class="btn-primary small" onclick="showAddTopicForm()">+ Add Topic</button>
+        </div>
+        <div class="add-topic-form" id="addTopicForm" style="display:none">
+          <input type="text" id="topicNameInput" class="input-field" placeholder="Topic name…" />
+          <textarea id="topicDescInput" class="input-field textarea" rows="2" placeholder="Notes / description (optional)"></textarea>
+          <div class="form-actions">
+            <button class="btn-primary small" onclick="addTopic()">Add</button>
+            <button class="btn-ghost small" onclick="document.getElementById('addTopicForm').style.display='none'">Cancel</button>
+          </div>
+        </div>
+        <div id="topicChecklist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFETTI ===== -->
+<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none;"></canvas>
+
+<script src="app.js"></script>
+</body>
+</html>
